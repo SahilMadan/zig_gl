@@ -4,7 +4,7 @@ const c = @cImport({
 });
 
 const std = @import("std");
-const warn = std.debug.warn;
+const panic = std.debug.panic;
 
 // Settings
 const screen_width: u32 = 800;
@@ -13,8 +13,7 @@ const screen_height: u32 = 600;
 pub fn main() u8 {
     // GLFW: Initialize and configure
     if (c.glfwInit() == 0) {
-        warn("Failed to initialize GLFW\n", .{});
-        return 1;
+        panic("Failed to initialize GLFW\n", .{});
     }
     defer c.glfwTerminate();
 
@@ -25,8 +24,7 @@ pub fn main() u8 {
 
     var window = c.glfwCreateWindow(screen_width, screen_height, "LearnOpenGL", null, null);
     if (window == null) {
-        warn("Failed to create GLFW window", .{});
-        return 1;
+        panic("Failed to create GLFW window\n", .{});
     }
     defer c.glfwDestroyWindow(window);
 
@@ -35,8 +33,7 @@ pub fn main() u8 {
 
     // glad: load all OpenGL function pointers
     if (c.gladLoadGLLoader(@ptrCast(c.GLADloadproc, c.glfwGetProcAddress)) == 0) {
-        warn("Error loading glad", .{});
-        return 1;
+        panic("Error loading glad\n", .{});
     }
 
     // Render loop
