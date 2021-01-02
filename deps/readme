@@ -1,0 +1,25 @@
+The following instructions are for Windows.
+
+Create subdirectories include/ and lib/.
+
+GLFW
+- Copy all headers into include/
+- In GLFW src/: mkdir build
+- In build directory: cmake .. -DUSE_MSVC_RUNTIME_LIBRARY_DLL=OFF
+- Open GLFW.sln and build it (with Release x64 config)
+- Copy to lib/ subfolder
+
+GLAD
+- Generate GLAD header using https://glad.dav1d.de/
+- Copy all headers into include/
+- For glad.c: clang -c -Wall -o glad.o glad.c -I ../include/
+- For glad.o: llvm-ar.bat rc glad.lib .\glad.o
+- Copy to lib/ subfolder
+
+Appendix
+- To use clang/llvm-ar, install using Visual Studio.
+- In %USERPROFILE%, create bin/ directory
+- Add to path
+- Create clang.bat file
+- Contents (example): @"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\Llvm\x64\bin\clang.exe" %*
+- Do similar for llvm-ar.bat
