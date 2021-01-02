@@ -5,6 +5,7 @@ const c = @cImport({
 
 const std = @import("std");
 const panic = std.debug.panic;
+const sin = std.math.sin;
 
 // Settings
 const screen_width: u32 = 800;
@@ -21,8 +22,9 @@ const vertex_shader_source: [:0]const u8 =
 const fragment_shader_source: [:0]const u8 =
 \\#version 330 core
 \\out vec4 FragColor;
+\\uniform vec4 ourColor;
 \\void main() {
-\\    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+\\    FragColor = ourColor;
 \\}
 ;
 
@@ -94,9 +96,8 @@ pub fn main() u8 {
     // Set up vertex data (and buffer(s)) and configure vertex attributes
     const vertices = [_]f32{
         -0.5, -0.5, 0.0, // left  
-        0.5, -0.5, 0.0, // right 
-        0.0, 0.5,
-        0.0, // top         
+        0.5, -0.5,  0.0, // right 
+        0.0, 0.5, 0.0, // top         
     };
     var vbo: u32 = undefined;
     var vao: u32 = undefined;
@@ -138,8 +139,14 @@ pub fn main() u8 {
         c.glClearColor(0.2, 0.3, 0.3, 1.0);
         c.glClear(c.GL_COLOR_BUFFER_BIT);
 
-        // draw our first triangle
+        // be sure to activate the shader before any calls to glUniform
         c.glUseProgram(shader_program);
+
+        const time_value = c.glfwGetTime();
+        const green_value: f32 = @floatCast(f32, sin(time_value)) / 2.0 + 0.5;
+        const vertex_color_location = c.glGetUniformLocation(shader_program, "ourColor");
+        c.glUniform4f(vertex_color_location, 0.0, green_value, 0.0, 1.0);
+
         // seeing as we only have a single VAO there's no need to bind it every time, but we'll do
         // so to keep things a bit more organized
         c.glBindVertexArray(vao);

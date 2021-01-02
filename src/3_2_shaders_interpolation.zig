@@ -5,6 +5,7 @@ const c = @cImport({
 
 const std = @import("std");
 const panic = std.debug.panic;
+const sin = std.math.sin;
 
 // Settings
 const screen_width: u32 = 800;
@@ -12,17 +13,22 @@ const screen_height: u32 = 600;
 
 const vertex_shader_source: [:0]const u8 =
 \\#version 330 core
-\\layout (location = 0) in vec3 aPos;
+\\layout (location = 0) in vec3 aPos;    // the position variable has attribute position 0
+\\layout (location = 1) in vec3 aColor;  // the color variable has attribute position 1
+\\
+\\out vec3 ourColor;  // output a color to the fragment shader
 \\void main() {
 \\    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+\\    ourColor = aColor; // set ourColor to the input color we got from the vertex data
 \\};
 ;
 
 const fragment_shader_source: [:0]const u8 =
 \\#version 330 core
 \\out vec4 FragColor;
+\\in vec3 ourColor;
 \\void main() {
-\\    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+\\    FragColor = vec4(ourColor, 1.0f);
 \\}
 ;
 
@@ -93,10 +99,10 @@ pub fn main() u8 {
 
     // Set up vertex data (and buffer(s)) and configure vertex attributes
     const vertices = [_]f32{
-        -0.5, -0.5, 0.0, // left  
-        0.5, -0.5, 0.0, // right 
-        0.0, 0.5,
-        0.0, // top         
+         // positions        // colors
+         0.5, -0.5, 0.0,  1.0, 0.0, 0.0,   // bottom right
+        -0.5, -0.5, 0.0,  0.0, 1.0, 0.0,   // bottom left
+         0.0,  0.5, 0.0,  0.0, 0.0, 1.0    // top     
     };
     var vbo: u32 = undefined;
     var vao: u32 = undefined;
@@ -114,8 +120,13 @@ pub fn main() u8 {
     c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(@TypeOf(vertices)), &vertices,
             c.GL_STATIC_DRAW);
 
-    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 3 * @sizeOf(f32), null);
+    // position attribute
+    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), null);
     c.glEnableVertexAttribArray(0);
+    // color attribute
+    c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32),
+            @intToPtr(*c_void, 3 * @sizeOf(f32)));
+    c.glEnableVertexAttribArray(1);
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex
     // attribute's bound vertex buffer object so afterwards we can safely unbind
@@ -126,8 +137,9 @@ pub fn main() u8 {
     // generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     c.glBindVertexArray(0);
 
-    // uncomment this call to draw in wireframe polygons.
-    //c.glPolygonMode(c.GL_FRONT_AND_BACK, c.GL_LINE);
+    // as we only have a single shader, we could also just activate our shader once beforehand if we
+    // want to 
+    c.glUseProgram(shader_program);
 
     // Render loop
     while (c.glfwWindowShouldClose(window) == 0) {
@@ -138,14 +150,10 @@ pub fn main() u8 {
         c.glClearColor(0.2, 0.3, 0.3, 1.0);
         c.glClear(c.GL_COLOR_BUFFER_BIT);
 
-        // draw our first triangle
-        c.glUseProgram(shader_program);
         // seeing as we only have a single VAO there's no need to bind it every time, but we'll do
         // so to keep things a bit more organized
         c.glBindVertexArray(vao);
         c.glDrawArrays(c.GL_TRIANGLES, 0, 3);
-        // no need to unbind it every time
-        // c.glBindVertexArray(0); 
 
         // GLFW: Swap buffers and poll IO events (keys pressed/released, mouse moved, etc.)
         c.glfwSwapBuffers(window);

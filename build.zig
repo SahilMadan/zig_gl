@@ -16,6 +16,16 @@ const targets = [_]Target{
         .path = "src/2_2_hello_triangle_indexed.zig",
         .description = "Hello Triangle Indexed: Draw two triangles using Element Buffer Object.",
     },
+    .{
+        .name = "3_1",
+        .path = "src/3_1_shaders_uniform.zig",
+        .description = "Shaders Uniform: Set triangle color through shader uniform.",
+    },
+    .{
+        .name = "3_2",
+        .path = "src/3_2_shaders_interpolation.zig",
+        .description = "Shaders Interpolation: Set & interpolate triangle color between vertices.",
+    },
 };
 
 pub fn build(b: *Builder) void {

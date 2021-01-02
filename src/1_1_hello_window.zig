@@ -62,6 +62,7 @@ pub fn processInput(window: ?*c.GLFWwindow) void {
 }
 
 /// GLFW: Whenever the window size changed (by OS or user resize) this callback function executes
-pub fn framebufferSizeCallback(window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
+pub fn framebufferSizeCallback(
+        window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
     c.glViewport(0, 0, width, height);
 }

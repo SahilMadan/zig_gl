@@ -121,10 +121,12 @@ pub fn main() u8 {
     c.glBindVertexArray(vao);
 
     c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo);
-    c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(@TypeOf(vertices)), &vertices, c.GL_STATIC_DRAW);
+    c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(@TypeOf(vertices)), &vertices,
+            c.GL_STATIC_DRAW);
 
     c.glBindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, ebo);
-    c.glBufferData(c.GL_ELEMENT_ARRAY_BUFFER, indices.len * @sizeOf(@TypeOf(indices)), &indices, c.GL_STATIC_DRAW);
+    c.glBufferData(c.GL_ELEMENT_ARRAY_BUFFER, indices.len * @sizeOf(@TypeOf(indices)), &indices,
+            c.GL_STATIC_DRAW);
 
     c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 3 * @sizeOf(f32), null);
     c.glEnableVertexAttribArray(0);
@@ -180,6 +182,7 @@ pub fn processInput(window: ?*c.GLFWwindow) void {
 }
 
 /// GLFW: Whenever the window size changed (by OS or user resize) this callback function executes
-pub fn framebufferSizeCallback(window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
+pub fn framebufferSizeCallback(
+        window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
     c.glViewport(0, 0, width, height);
 }
