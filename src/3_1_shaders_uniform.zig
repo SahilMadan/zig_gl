@@ -96,8 +96,8 @@ pub fn main() u8 {
     // Set up vertex data (and buffer(s)) and configure vertex attributes
     const vertices = [_]f32{
         -0.5, -0.5, 0.0, // left  
-        0.5, -0.5,  0.0, // right 
-        0.0, 0.5, 0.0, // top         
+         0.5, -0.5, 0.0, // right 
+         0.0,  0.5, 0.0, // top         
     };
     var vbo: u32 = undefined;
     var vao: u32 = undefined;

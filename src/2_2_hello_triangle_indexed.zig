@@ -93,16 +93,14 @@ pub fn main() u8 {
 
     // Set up vertex data (and buffer(s)) and configure vertex attributes
     const vertices = [_]f32{
-        0.5, 0.5, 0.0, // top right
-        0.5, -0.5, 0.0, // bottom right
+         0.5,  0.5, 0.0, // top right
+         0.5, -0.5, 0.0, // bottom right
         -0.5, -0.5, 0.0, // bottom left
-        -0.5, 0.5,
-        0.0, // top left        
+        -0.5,  0.5, 0.0, // top left        
     };
     const indices = [_]u32{
         0, 1, 3, // first Triangle
-        1, 2,
-        3, // second Triangle
+        1, 2, 3, // second Triangle
     };
     var vbo: u32 = undefined;
     var vao: u32 = undefined;

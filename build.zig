@@ -26,6 +26,11 @@ const targets = [_]Target{
         .path = "src/3_2_shaders_interpolation.zig",
         .description = "Shaders Interpolation: Set & interpolate triangle color between vertices.",
     },
+    .{
+        .name = "3_3",
+        .path = "src/3_3_shaders_class.zig",
+        .description = "Shaderrs Class: TODO DESCRIPTION",
+    },
 };
 
 pub fn build(b: *Builder) void {
