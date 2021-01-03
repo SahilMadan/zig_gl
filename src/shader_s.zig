@@ -9,12 +9,6 @@ const page_allocator = std.heap.page_allocator;
 const panic = std.debug.panic;
 const OpenFlags = std.fs.File.OpenFlags;
 
-const CompileType = enum {
-    vertex,
-    fragment,
-    program
-};
-
 pub const Shader = struct {
     id: c_uint,
 
@@ -97,4 +91,10 @@ pub const Shader = struct {
             }
         }
     }
+};
+
+const CompileType = enum {
+    vertex,
+    fragment,
+    program
 };
