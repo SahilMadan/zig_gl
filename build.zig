@@ -84,13 +84,19 @@ const targets = [_]Target{
     .{
         .name = "3_3",
         .path = "src/3_3_shaders_class.zig",
-        .description = "Shaders Class: Create a separated Shaders class",
+        .description = "Shaders Class: Create a separated Shaders class.",
         .dependencies = &[_]Dependencies{},
     },
     .{
         .name = "4_1",
         .path = "src/4_1_textures.zig",
-        .description = "Textures: Map a texture to our square",
+        .description = "Textures: Map a texture to our square.",
+        .dependencies = &[_]Dependencies{Dependencies.stb_image},
+    },
+    .{
+        .name = "4_2",
+        .path = "src/4_2_textures_combined.zig",
+        .description = "Textures Combined: Multiple textures using texture units.",
         .dependencies = &[_]Dependencies{Dependencies.stb_image},
     },
 };

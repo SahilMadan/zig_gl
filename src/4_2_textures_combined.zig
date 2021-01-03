@@ -56,7 +56,7 @@ pub fn main() !u8 {
 
     // Build and compile our shader program
     // vertex shader
-    const our_shader = try Shader.init("shaders/4_1_vshader.glsl", "shaders/4_1_fshader.glsl");
+    const our_shader = try Shader.init("shaders/4_1_vshader.glsl", "shaders/4_2_fshader.glsl");
     defer our_shader.free();
 
     // Set up vertex data (and buffer(s)) and configure vertex attributes
@@ -111,34 +111,56 @@ pub fn main() !u8 {
     var width: c_int = undefined;
     var height: c_int = undefined;
     var channel_count: c_int = undefined;
-    var data = c.stbi_load("resources/textures/container.jpg", &width, &height, &channel_count, 0);
-
-    if (data == null) {
-        panic("Failed to load texture\n", .{});
-    }
-    var texture: u32 = undefined;
-    c.glGenTextures(1, &texture);
-    c.glBindTexture(c.GL_TEXTURE_2D, texture);
+    
+    var texture1: u32 = undefined;
+    var texture2: u32 = undefined;
+    // texture 1
+    c.glGenTextures(1, &texture1);
+    c.glBindTexture(c.GL_TEXTURE_2D, texture1);
     // set the texture wrapping parameters
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
     // set texture filtering parameters
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR);
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    var data = c.stbi_load("resources/textures/container.jpg", &width, &height, &channel_count, 0);
 
+    if (data == null) {
+        panic("Failed to load texture 1\n", .{});
+    }
     c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGB, c.GL_UNSIGNED_BYTE,
             data);
     c.glGenerateMipmap(c.GL_TEXTURE_2D);
     c.stbi_image_free(data);
 
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex
-    // attribute's bound vertex buffer object so afterwards we can safely unbind
-    c.glBindBuffer(c.GL_ARRAY_BUFFER, 0);
+    // texture 2
+    c.glGenTextures(1, &texture2);
+    c.glBindTexture(c.GL_TEXTURE_2D, texture2);
+    // set the texture wrapping parameters
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
+    // set texture filtering parameters
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    c.stbi_set_flip_vertically_on_load(1);  
+    data = c.stbi_load("resources/textures/awesomeface.png", &width, &height, &channel_count, 0);
 
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but
-    // this rarely happens. Modifying other VAOs requires a call to glBindVertexArray anyways so we
-    // generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    // c.glBindVertexArray(0);
+    if (data == null) {
+        panic("Failed to load texture 1\n", .{});
+    }
+    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGBA, c.GL_UNSIGNED_BYTE,
+            data);
+    c.glGenerateMipmap(c.GL_TEXTURE_2D);
+    c.stbi_image_free(data);
+
+    // tell OpenGL for each sampler to which texture unit it belongs to (only has to be done once)
+    our_shader.use();
+    // either set it manually like so:
+    c.glUniform1i(c.glGetUniformLocation(our_shader.id, "texture1"), 0);
+    // or set it via the texture class
+    our_shader.setInt("texture2", 1);
 
     // Render loop
     while (c.glfwWindowShouldClose(window) == 0) {
@@ -150,7 +172,11 @@ pub fn main() !u8 {
         c.glClear(c.GL_COLOR_BUFFER_BIT);
 
         // Bind texture
-        c.glBindTexture(c.GL_TEXTURE_2D, texture);
+        // activate the texture unit first before binding texture
+        c.glActiveTexture(c.GL_TEXTURE0);
+        c.glBindTexture(c.GL_TEXTURE_2D, texture1);
+        c.glActiveTexture(c.GL_TEXTURE1);
+        c.glBindTexture(c.GL_TEXTURE_2D, texture2);
 
         // Render the triangle
         our_shader.use();
