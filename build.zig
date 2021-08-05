@@ -1,4 +1,5 @@
 const Builder = @import("std").build.Builder;
+const builtin = @import("builtin");
 
 const Dependencies = enum {
     stb_image,
@@ -26,15 +27,17 @@ const Target = struct {
         exe.linkSystemLibrary("glfw3");
         exe.linkSystemLibrary("glad");
         exe.linkSystemLibrary("c");
-        exe.linkSystemLibrary("user32");
-        exe.linkSystemLibrary("gdi32");
-        exe.linkSystemLibrary("shell32");
+        if (builtin.os.tag == .windows) {
+            exe.linkSystemLibrary("user32");
+            exe.linkSystemLibrary("gdi32");
+            exe.linkSystemLibrary("shell32");
+        }
 
         for (self.dependencies) |dependency| {
             switch (dependency) {
                 Dependencies.stb_image => {
                     exe.addCSourceFile("./deps/src/stb_image.c", &[_][]const u8{"-std=c99"});
-                }
+                },
             }
         }
 

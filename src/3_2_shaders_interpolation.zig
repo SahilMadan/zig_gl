@@ -12,24 +12,24 @@ const screen_width: u32 = 800;
 const screen_height: u32 = 600;
 
 const vertex_shader_source: [:0]const u8 =
-\\#version 330 core
-\\layout (location = 0) in vec3 aPos;    // the position variable has attribute position 0
-\\layout (location = 1) in vec3 aColor;  // the color variable has attribute position 1
-\\
-\\out vec3 ourColor;  // output a color to the fragment shader
-\\void main() {
-\\    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-\\    ourColor = aColor; // set ourColor to the input color we got from the vertex data
-\\};
+    \\#version 330 core
+    \\layout (location = 0) in vec3 aPos;    // the position variable has attribute position 0
+    \\layout (location = 1) in vec3 aColor;  // the color variable has attribute position 1
+    \\
+    \\out vec3 ourColor;  // output a color to the fragment shader
+    \\void main() {
+    \\    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    \\    ourColor = aColor; // set ourColor to the input color we got from the vertex data
+    \\};
 ;
 
 const fragment_shader_source: [:0]const u8 =
-\\#version 330 core
-\\out vec4 FragColor;
-\\in vec3 ourColor;
-\\void main() {
-\\    FragColor = vec4(ourColor, 1.0f);
-\\}
+    \\#version 330 core
+    \\out vec4 FragColor;
+    \\in vec3 ourColor;
+    \\void main() {
+    \\    FragColor = vec4(ourColor, 1.0f);
+    \\}
 ;
 
 pub fn main() u8 {
@@ -69,7 +69,7 @@ pub fn main() u8 {
     c.glGetShaderiv(vertex_shader, c.GL_COMPILE_STATUS, &success);
     if (success == 0) {
         c.glGetShaderInfoLog(vertex_shader, 512, null, &info_log);
-        panic("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n{}\n", .{info_log});
+        panic("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n{s}\n", .{info_log});
     }
     // fragment shader
     const fragment_shader = c.glCreateShader(c.GL_FRAGMENT_SHADER);
@@ -79,7 +79,7 @@ pub fn main() u8 {
     c.glGetShaderiv(fragment_shader, c.GL_COMPILE_STATUS, &success);
     if (success == 0) {
         c.glGetShaderInfoLog(fragment_shader, 512, null, &info_log);
-        panic("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n{}\n", .{info_log});
+        panic("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n{s}\n", .{info_log});
     }
     //link shaders
     const shader_program = c.glCreateProgram();
@@ -92,17 +92,18 @@ pub fn main() u8 {
     c.glGetProgramiv(shader_program, c.GL_LINK_STATUS, &success);
     if (success == 0) {
         c.glGetProgramInfoLog(shader_program, 512, null, &info_log);
-        panic("ERROR::SHADER::PROGRAM::LINKING FAILED\n{}\n", .{info_log});
+        panic("ERROR::SHADER::PROGRAM::LINKING FAILED\n{s}\n", .{info_log});
     }
     c.glDeleteShader(vertex_shader);
     c.glDeleteShader(fragment_shader);
 
     // Set up vertex data (and buffer(s)) and configure vertex attributes
     const vertices = [_]f32{
-         // positions        // colors
-         0.5, -0.5, 0.0,  1.0, 0.0, 0.0,   // bottom right
-        -0.5, -0.5, 0.0,  0.0, 1.0, 0.0,   // bottom left
-         0.0,  0.5, 0.0,  0.0, 0.0, 1.0    // top     
+        // positions        // colors
+        0.5, -0.5, 0.0, 1.0, 0.0, 0.0, // bottom right
+        -0.5, -0.5, 0.0, 0.0, 1.0, 0.0, // bottom left
+        0.0,  0.5,  0.0, 0.0, 0.0,
+        1.0, // top
     };
     var vbo: u32 = undefined;
     var vao: u32 = undefined;
@@ -117,15 +118,13 @@ pub fn main() u8 {
     c.glBindVertexArray(vao);
 
     c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo);
-    c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(@TypeOf(vertices)), &vertices,
-            c.GL_STATIC_DRAW);
+    c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(@TypeOf(vertices)), &vertices, c.GL_STATIC_DRAW);
 
     // position attribute
     c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), null);
     c.glEnableVertexAttribArray(0);
     // color attribute
-    c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32),
-            @intToPtr(*c_void, 3 * @sizeOf(f32)));
+    c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @intToPtr(*c_void, 3 * @sizeOf(f32)));
     c.glEnableVertexAttribArray(1);
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex
@@ -138,7 +137,7 @@ pub fn main() u8 {
     c.glBindVertexArray(0);
 
     // as we only have a single shader, we could also just activate our shader once beforehand if we
-    // want to 
+    // want to
     c.glUseProgram(shader_program);
 
     // Render loop
@@ -172,7 +171,6 @@ pub fn processInput(window: ?*c.GLFWwindow) void {
 }
 
 /// GLFW: Whenever the window size changed (by OS or user resize) this callback function executes
-pub fn framebufferSizeCallback(
-        window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
+pub fn framebufferSizeCallback(window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
     c.glViewport(0, 0, width, height);
 }

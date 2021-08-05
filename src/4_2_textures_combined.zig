@@ -1,7 +1,7 @@
 const c = @cImport({
     @cInclude("glad/glad.h");
     @cInclude("GLFW/glfw3.h");
-    @cInclude("stb_image.h");
+    @cInclude("stb/stb_image.h");
 });
 
 const Shader = @import("shader_s.zig").Shader;
@@ -13,19 +13,19 @@ const screen_width: u32 = 800;
 const screen_height: u32 = 600;
 
 const vertex_shader_source: [:0]const u8 =
-\\#version 330 core
-\\layout (location = 0) in vec3 aPos;
-\\void main() {
-\\    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-\\};
+    \\#version 330 core
+    \\layout (location = 0) in vec3 aPos;
+    \\void main() {
+    \\    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    \\};
 ;
 
 const fragment_shader_source: [:0]const u8 =
-\\#version 330 core
-\\out vec4 FragColor;
-\\void main() {
-\\    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-\\}
+    \\#version 330 core
+    \\out vec4 FragColor;
+    \\void main() {
+    \\    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    \\}
 ;
 
 pub fn main() !u8 {
@@ -62,10 +62,11 @@ pub fn main() !u8 {
     // Set up vertex data (and buffer(s)) and configure vertex attributes
     const vertices = [_]f32{
         // positions       // colors        // texture coords
-         0.5,  0.5, 0.0,   1.0, 0.0, 0.0,   1.0, 1.0, // top right
-         0.5, -0.5, 0.0,   0.0, 1.0, 0.0,   1.0, 0.0, // bottom right
-        -0.5, -0.5, 0.0,   0.0, 0.0, 1.0,   0.0, 0.0, // bottom left
-        -0.5,  0.5, 0.0,   1.0, 1.0, 0.0,   0.0, 1.0  // top left        
+        0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, // top right
+        0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, // bottom right
+        -0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, // bottom left
+        -0.5, 0.5,  0.0, 1.0, 1.0, 0.0, 0.0,
+        1.0, // top left
     };
     const indices = [_]u32{
         0, 1, 3, // first Triangle
@@ -88,30 +89,26 @@ pub fn main() !u8 {
     c.glBindVertexArray(vao);
 
     c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo);
-    c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(@TypeOf(vertices)), &vertices,
-            c.GL_STATIC_DRAW);
+    c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(@TypeOf(vertices)), &vertices, c.GL_STATIC_DRAW);
 
     c.glBindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, ebo);
-    c.glBufferData(c.GL_ELEMENT_ARRAY_BUFFER, indices.len * @sizeOf(@TypeOf(indices)), &indices,
-            c.GL_STATIC_DRAW);
+    c.glBufferData(c.GL_ELEMENT_ARRAY_BUFFER, indices.len * @sizeOf(@TypeOf(indices)), &indices, c.GL_STATIC_DRAW);
 
     // position attribute
     c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32), null);
     c.glEnableVertexAttribArray(0);
     // color attribute
-    c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32),
-            @intToPtr(*c_void, 3 * @sizeOf(f32)));
+    c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32), @intToPtr(*c_void, 3 * @sizeOf(f32)));
     c.glEnableVertexAttribArray(1);
     // texture coord attribute
-    c.glVertexAttribPointer(2, 2, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32),
-            @intToPtr(*c_void, 6 * @sizeOf(f32)));
+    c.glVertexAttribPointer(2, 2, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32), @intToPtr(*c_void, 6 * @sizeOf(f32)));
     c.glEnableVertexAttribArray(2);
 
     // Load and create texture
     var width: c_int = undefined;
     var height: c_int = undefined;
     var channel_count: c_int = undefined;
-    
+
     var texture1: u32 = undefined;
     var texture2: u32 = undefined;
     // texture 1
@@ -129,8 +126,7 @@ pub fn main() !u8 {
     if (data == null) {
         panic("Failed to load texture 1\n", .{});
     }
-    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGB, c.GL_UNSIGNED_BYTE,
-            data);
+    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGB, c.GL_UNSIGNED_BYTE, data);
     c.glGenerateMipmap(c.GL_TEXTURE_2D);
     c.stbi_image_free(data);
 
@@ -144,14 +140,13 @@ pub fn main() !u8 {
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR);
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
     // load image, create texture and generate mipmaps
-    c.stbi_set_flip_vertically_on_load(1);  
+    c.stbi_set_flip_vertically_on_load(1);
     data = c.stbi_load("resources/textures/awesomeface.png", &width, &height, &channel_count, 0);
 
     if (data == null) {
         panic("Failed to load texture 1\n", .{});
     }
-    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGBA, c.GL_UNSIGNED_BYTE,
-            data);
+    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGBA, c.GL_UNSIGNED_BYTE, data);
     c.glGenerateMipmap(c.GL_TEXTURE_2D);
     c.stbi_image_free(data);
 
@@ -200,7 +195,6 @@ pub fn processInput(window: ?*c.GLFWwindow) void {
 }
 
 /// GLFW: Whenever the window size changed (by OS or user resize) this callback function executes
-pub fn framebufferSizeCallback(
-        window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
+pub fn framebufferSizeCallback(window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
     c.glViewport(0, 0, width, height);
 }

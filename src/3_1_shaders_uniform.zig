@@ -12,20 +12,20 @@ const screen_width: u32 = 800;
 const screen_height: u32 = 600;
 
 const vertex_shader_source: [:0]const u8 =
-\\#version 330 core
-\\layout (location = 0) in vec3 aPos;
-\\void main() {
-\\    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-\\};
+    \\#version 330 core
+    \\layout (location = 0) in vec3 aPos;
+    \\void main() {
+    \\    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    \\};
 ;
 
 const fragment_shader_source: [:0]const u8 =
-\\#version 330 core
-\\out vec4 FragColor;
-\\uniform vec4 ourColor;
-\\void main() {
-\\    FragColor = ourColor;
-\\}
+    \\#version 330 core
+    \\out vec4 FragColor;
+    \\uniform vec4 ourColor;
+    \\void main() {
+    \\    FragColor = ourColor;
+    \\}
 ;
 
 pub fn main() u8 {
@@ -65,7 +65,7 @@ pub fn main() u8 {
     c.glGetShaderiv(vertex_shader, c.GL_COMPILE_STATUS, &success);
     if (success == 0) {
         c.glGetShaderInfoLog(vertex_shader, 512, null, &info_log);
-        panic("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n{}\n", .{info_log});
+        panic("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n{s}\n", .{info_log});
     }
     // fragment shader
     const fragment_shader = c.glCreateShader(c.GL_FRAGMENT_SHADER);
@@ -75,7 +75,7 @@ pub fn main() u8 {
     c.glGetShaderiv(fragment_shader, c.GL_COMPILE_STATUS, &success);
     if (success == 0) {
         c.glGetShaderInfoLog(fragment_shader, 512, null, &info_log);
-        panic("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n{}\n", .{info_log});
+        panic("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n{s}\n", .{info_log});
     }
     //link shaders
     const shader_program = c.glCreateProgram();
@@ -88,16 +88,16 @@ pub fn main() u8 {
     c.glGetProgramiv(shader_program, c.GL_LINK_STATUS, &success);
     if (success == 0) {
         c.glGetProgramInfoLog(shader_program, 512, null, &info_log);
-        panic("ERROR::SHADER::PROGRAM::LINKING FAILED\n{}\n", .{info_log});
+        panic("ERROR::SHADER::PROGRAM::LINKING FAILED\n{s}\n", .{info_log});
     }
     c.glDeleteShader(vertex_shader);
     c.glDeleteShader(fragment_shader);
 
     // Set up vertex data (and buffer(s)) and configure vertex attributes
     const vertices = [_]f32{
-        -0.5, -0.5, 0.0, // left  
-         0.5, -0.5, 0.0, // right 
-         0.0,  0.5, 0.0, // top         
+        -0.5, -0.5, 0.0, // left
+        0.5, -0.5, 0.0, // right
+        0.0, 0.5, 0.0, // top
     };
     var vbo: u32 = undefined;
     var vao: u32 = undefined;
@@ -112,8 +112,7 @@ pub fn main() u8 {
     c.glBindVertexArray(vao);
 
     c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo);
-    c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(@TypeOf(vertices)), &vertices,
-            c.GL_STATIC_DRAW);
+    c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(@TypeOf(vertices)), &vertices, c.GL_STATIC_DRAW);
 
     c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 3 * @sizeOf(f32), null);
     c.glEnableVertexAttribArray(0);
@@ -152,7 +151,7 @@ pub fn main() u8 {
         c.glBindVertexArray(vao);
         c.glDrawArrays(c.GL_TRIANGLES, 0, 3);
         // no need to unbind it every time
-        // c.glBindVertexArray(0); 
+        // c.glBindVertexArray(0);
 
         // GLFW: Swap buffers and poll IO events (keys pressed/released, mouse moved, etc.)
         c.glfwSwapBuffers(window);
@@ -171,7 +170,6 @@ pub fn processInput(window: ?*c.GLFWwindow) void {
 }
 
 /// GLFW: Whenever the window size changed (by OS or user resize) this callback function executes
-pub fn framebufferSizeCallback(
-        window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
+pub fn framebufferSizeCallback(window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
     c.glViewport(0, 0, width, height);
 }

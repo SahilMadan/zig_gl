@@ -13,12 +13,10 @@ pub const Shader = struct {
     id: c_uint,
 
     pub fn init(vertex_path: []const u8, fragment_path: []const u8) !Shader {
-        const vertex_shader_file = try cwd().openFile(vertex_path,
-                OpenFlags{.read = true, .write = false});
+        const vertex_shader_file = try cwd().openFile(vertex_path, OpenFlags{ .read = true, .write = false });
         defer vertex_shader_file.close();
 
-        const fragment_shader_file = try cwd().openFile(fragment_path,
-                OpenFlags{.read = true, .write = false});
+        const fragment_shader_file = try cwd().openFile(fragment_path, OpenFlags{ .read = true, .write = false });
         defer fragment_shader_file.close();
 
         const vertex_code = try page_allocator.alloc(u8, try vertex_shader_file.getEndPos());
@@ -48,7 +46,7 @@ pub const Shader = struct {
         // check for linking errors
         checkCompileErrors(shader_program, CompileType.program);
 
-        return Shader{.id = shader_program};
+        return Shader{ .id = shader_program };
     }
 
     pub fn free(self: Shader) void {
@@ -79,22 +77,16 @@ pub const Shader = struct {
             c.glGetShaderiv(shader, c.GL_COMPILE_STATUS, &success);
             if (success == 0) {
                 c.glGetShaderInfoLog(shader, 512, null, &info_log);
-                panic("ERROR::SHADER_COMPILATION_ERROR of type: {}\n{}\n",
-                        .{compile_type, info_log});
+                panic("ERROR::SHADER_COMPILATION_ERROR of type: {}\n{s}\n", .{ compile_type, info_log });
             }
         } else {
             c.glGetProgramiv(shader, c.GL_LINK_STATUS, &success);
             if (success == 0) {
                 c.glGetProgramInfoLog(shader, 1024, null, &info_log);
-                panic("ERROR::PROGRAM_LINKING_ERROR of type: {}\n{}\n",
-                        .{compile_type, info_log});
+                panic("ERROR::PROGRAM_LINKING_ERROR of type: {}\n{s}\n", .{ compile_type, info_log });
             }
         }
     }
 };
 
-const CompileType = enum {
-    vertex,
-    fragment,
-    program
-};
+const CompileType = enum { vertex, fragment, program };
